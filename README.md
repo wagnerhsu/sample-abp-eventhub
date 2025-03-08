@@ -21,7 +21,7 @@ This solution is originally prepared to be a real-world example for the **Master
 
 ## How to run
 
-* Run `etc/docker/up.ps1` before running the solution.
+* Run `u` before running the solution.
 * Run `EventHub.DbMigrator` to create the database and seed initial data.
 * Run `EventHub.IdentityServer`
 * Run `EventHub.HttpApi.Host`
