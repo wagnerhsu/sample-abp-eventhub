@@ -16,12 +16,13 @@ This solution is originally prepared to be a real-world example for the **Master
 
 ## Requirements
 
-* .NET 6.0+
+* .NET 8.0+
 * Docker
 
 ## How to run
 
-* Run `u` before running the solution.
+* Execute `dotnet build /graphBuild` command in the root folder of the solution.
+* Run `etc/docker/up.ps1` before running the solution.
 * Run `EventHub.DbMigrator` to create the database and seed initial data.
 * Run `EventHub.IdentityServer`
 * Run `EventHub.HttpApi.Host`

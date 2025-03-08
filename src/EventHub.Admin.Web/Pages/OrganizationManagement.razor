@@ -1,8 +1,8 @@
 @page "/organizations"
 @using EventHub.Admin.Organizations
 @using EventHub.Admin.Permissions
+@using EventHub.Options
 @using EventHub.Organizations
-@using EventHub.Web
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Options
 @using Volo.Abp.AspNetCore.Components.Notifications
@@ -111,7 +111,7 @@
         <Form id="EditOrganizationForm">
             <ModalHeader>
                 <ModalTitle>@L["UpdateOrganization"]</ModalTitle>
-                <CloseButton Clicked="() => EditOrganizationModal.Hide()"/>
+                <CloseButton Clicked="@CloseUpdateOrganizationModal"/>
             </ModalHeader>
             <ModalBody>
                 <Tabs SelectedTab="@SelectedTabInEditModal" SelectedTabChanged="@OnSelectedTabChangedInEditModal">
@@ -241,7 +241,7 @@
                                     <Column ColumnSize="ColumnSize.Is3">
                                         @if (DisabledProfileImageButton)
                                         {
-                                            <Button disabled Color="Color.Secondary" Clicked="@OnDeleteCoverImageButtonClicked">@L["DeleteCoverImage"]</Button>
+                                            <Button disabled Color="Color.Secondary" Clicked="@OnDeleteCoverImageButtonClicked" >@L["DeleteCoverImage"]</Button>
                                         }
                                         else
                                         {
@@ -256,8 +256,8 @@
             </ModalBody>
             <ModalFooter>
                 <Button Color="Color.Secondary"
-                        Clicked="() => EditOrganizationModal.Hide()">
-                    @L["Cancel"]
+                        Clicked="@CloseUpdateOrganizationModal">
+                     @L["Cancel"]
                 </Button>
                 <Button Type="ButtonType.Submit" PreventDefaultOnSubmit="true" Color="Color.Primary"
                         Clicked="UpdateOrganizationAsync">

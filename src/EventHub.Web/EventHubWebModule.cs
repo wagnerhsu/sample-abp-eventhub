@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using EventHub.Localization;
+using EventHub.Options;
 using EventHub.Web.Menus;
 using EventHub.Web.Theme;
 using EventHub.Web.Theme.Bundling;
@@ -170,7 +171,7 @@ namespace EventHub.Web
                     options.Scope.Add("EventHub");
                 });
         }
-
+        
         private void ConfigureAutoMapper()
         {
             Configure<AbpAutoMapperOptions>(options =>
@@ -185,7 +186,7 @@ namespace EventHub.Web
             {
                 Configure<AbpVirtualFileSystemOptions>(options =>
                 {
-                    options.FileSets.ReplaceEmbeddedByPhysical<EventHubDomainSharedModule>(Path.Combine(hostingEnvironment.ContentRootPath, $"..{Path.DirectorySeparatorChar}EventHub.Domain"));
+                    options.FileSets.ReplaceEmbeddedByPhysical<EventHubDomainSharedModule>(Path.Combine(hostingEnvironment.ContentRootPath, $"..{Path.DirectorySeparatorChar}EventHub.Domain.Shared"));
                     options.FileSets.ReplaceEmbeddedByPhysical<EventHubApplicationContractsModule>(Path.Combine(hostingEnvironment.ContentRootPath, $"..{Path.DirectorySeparatorChar}EventHub.Application.Contracts"));
                     options.FileSets.ReplaceEmbeddedByPhysical<EventHubWebThemeModule>(Path.Combine(hostingEnvironment.ContentRootPath, $"..{Path.DirectorySeparatorChar}EventHub.Web.Theme"));
                     options.FileSets.ReplaceEmbeddedByPhysical<EventHubWebModule>(hostingEnvironment.ContentRootPath);
@@ -258,7 +259,7 @@ namespace EventHub.Web
 
             app.UseCookiePolicy();
             app.UseCorrelationId();
-            app.UseStaticFiles();
+            app.MapAbpStaticAssets();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();

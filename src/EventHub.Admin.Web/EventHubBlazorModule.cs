@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Net.Http;
-using Blazorise.Bootstrap;
+using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
 using EventHub.Admin.Web.Menus;
 using IdentityModel;
@@ -15,6 +15,7 @@ using Volo.Abp.Autofac.WebAssembly;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Identity.Blazor.WebAssembly;
 using Volo.Abp.Modularity;
+using Volo.Abp.SettingManagement.Blazor.WebAssembly;
 using Volo.Abp.UI.Navigation;
 
 namespace EventHub.Admin.Web
@@ -24,7 +25,8 @@ namespace EventHub.Admin.Web
         typeof(EventHubAdminHttpApiClientModule),
         typeof(AbpAspNetCoreComponentsWebAssemblyBasicThemeModule),
         typeof(AbpIdentityBlazorWebAssemblyModule),
-        typeof(PaymentAdminBlazorModule)
+        typeof(PaymentAdminBlazorModule),
+        typeof(AbpSettingManagementBlazorWebAssemblyModule)
     )]
     public class EventHubBlazorModule : AbpModule
     {
@@ -61,7 +63,7 @@ namespace EventHub.Admin.Web
         private void ConfigureBlazorise(ServiceConfigurationContext context)
         {
             context.Services
-                .AddBootstrapProviders()
+                .AddBootstrap5Providers()
                 .AddFontAwesomeIcons();
         }
 

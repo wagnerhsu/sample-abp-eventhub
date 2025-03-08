@@ -5,10 +5,11 @@ using System.IO;
 using System.Linq;
 using EventHub.EntityFrameworkCore;
 using EventHub.Events;
+using EventHub.Options;
 using EventHub.Organizations;
 using EventHub.Organizations.Plans;
 using EventHub.Utils;
-using EventHub.Web;
+using EventHub.Web.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
@@ -45,7 +46,8 @@ namespace EventHub
         typeof(AbpCachingStackExchangeRedisModule),
         typeof(AbpAspNetCoreSerilogModule),
         typeof(AbpSwashbuckleModule),
-        typeof(AbpAspNetCoreMvcUiBasicThemeModule)
+        typeof(AbpAspNetCoreMvcUiBasicThemeModule),
+        typeof(EventHubWebSharedModule)
     )]
     public class EventHubHttpApiHostModule : AbpModule
     {
@@ -68,7 +70,7 @@ namespace EventHub
             ConfigureTiming();
             ConfigurePremiumPlanInfo(context, configuration);
         }
-        
+
         private void ConfigureAutoApiControllers()
         {
             Configure<AbpAspNetCoreMvcOptions>(options =>
@@ -96,7 +98,7 @@ namespace EventHub
         private void ConfigureVirtualFileSystem(ServiceConfigurationContext context)
         {
             var hostingEnvironment = context.Services.GetHostingEnvironment();
-            
+
             Configure<AbpVirtualFileSystemOptions>(options =>
             {
                 options.FileSets.AddEmbedded<EventHubHttpApiHostModule>(
@@ -152,7 +154,7 @@ namespace EventHub
         {
             Configure<AbpLocalizationOptions>(options =>
             {
-                options.Languages.Add(new LanguageInfo("en", "en", "English", "gb"));
+                options.Languages.Add(new LanguageInfo("en", "en", "English"));
             });
         }
 
@@ -174,7 +176,8 @@ namespace EventHub
                 {
                     builder
                         .WithOrigins(
-                            EventHubUrlOptions.GetWwwConfigValue(configuration)
+                            EventHubUrlOptions.GetWwwConfigValue(configuration),
+                            EventHubUrlOptions.GetAdminConfigValue(configuration)
                         )
                         .WithAbpExposedHeaders()
                         .SetIsOriginAllowedToAllowWildcardSubdomains()
@@ -189,12 +192,12 @@ namespace EventHub
         {
             context.Services.AddSameSiteCookiePolicy();
         }
-        
+
         private void ConfigureTiming()
         {
             Configure<AbpClockOptions>(options => { options.Kind = DateTimeKind.Utc; });
         }
-        
+
         private void ConfigurePremiumPlanInfo(ServiceConfigurationContext context, IConfiguration configuration)
         {
             context.Services.AddOptions<List<PlanInfoDefinition>>()
@@ -218,7 +221,7 @@ namespace EventHub
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.Use((context, next) =>
             {
                 context.Request.Scheme = "https";
@@ -229,7 +232,7 @@ namespace EventHub
             {
                 new CultureInfo("en")
             };
-            
+
             app.UseAbpRequestLocalization(options =>
             {
                 options.DefaultRequestCulture = new RequestCulture("en");
@@ -249,7 +252,7 @@ namespace EventHub
 
             app.UseCookiePolicy();
             app.UseCorrelationId();
-            app.UseStaticFiles();
+            app.MapAbpStaticAssets();
             app.UseRouting();
             app.UseCors(DefaultCorsPolicyName);
             app.UseAuthentication();

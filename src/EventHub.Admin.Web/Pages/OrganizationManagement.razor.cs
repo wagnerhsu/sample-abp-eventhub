@@ -52,7 +52,7 @@ namespace EventHub.Admin.Web.Pages
         private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<OrganizationInListDto> e)
         {
             CurrentSorting = e.Columns
-                .Where(c => c.SortDirection != SortDirection.None)
+                .Where(c => c.SortDirection != SortDirection.Default)
                 .Select(c => c.Field + (c.SortDirection == SortDirection.Descending ? " DESC" : ""))
                 .JoinAsString(",");
             CurrentPage = e.Page - 1;
@@ -102,6 +102,12 @@ namespace EventHub.Admin.Web.Pages
             IsLoadingProfileImage = false;
         }
 
+        private void CloseUpdateOrganizationModal()
+        {
+            DisabledProfileImageButton = false;
+            EditOrganizationModal.Hide();
+        }
+        
         private async Task DeleteOrganizationAsync(OrganizationInListDto organization)
         {
             await OrganizationAppService.DeleteAsync(organization.Id);

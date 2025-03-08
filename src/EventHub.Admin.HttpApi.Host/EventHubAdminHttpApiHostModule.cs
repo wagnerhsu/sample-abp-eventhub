@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.Claims;
 using EventHub.Admin.Events;
 using EventHub.Admin.Organizations;
 using EventHub.Admin.Utils;
 using EventHub.EntityFrameworkCore;
-using EventHub.Web;
+using EventHub.Options;
+using EventHub.Web.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
@@ -28,7 +30,9 @@ using Volo.Abp.Caching;
 using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
+using Volo.Abp.Security.Claims;
 using Volo.Abp.Swashbuckle;
+using Volo.Abp.Timing;
 using Volo.Abp.VirtualFileSystem;
 
 namespace EventHub.Admin
@@ -41,7 +45,8 @@ namespace EventHub.Admin
         typeof(AbpCachingStackExchangeRedisModule),
         typeof(AbpAspNetCoreSerilogModule),
         typeof(AbpSwashbuckleModule),
-        typeof(AbpAspNetCoreMvcUiBasicThemeModule)
+        typeof(AbpAspNetCoreMvcUiBasicThemeModule),
+        typeof(EventHubWebSharedModule)
     )]
     public class EventHubAdminHttpApiHostModule : AbpModule
     {
@@ -61,9 +66,10 @@ namespace EventHub.Admin
             ConfigureCookies(context);
             ConfigureSwaggerServices(context, configuration);
             ConfigureBackgroundJobs();
+            ConfigureTiming();
             ConfigureAutoApiControllers();
         }
-        
+
         private void ConfigureAutoApiControllers()
         {
             Configure<AbpAspNetCoreMvcOptions>(options =>
@@ -84,6 +90,11 @@ namespace EventHub.Admin
         private void ConfigureCache(IConfiguration configuration)
         {
             Configure<AbpDistributedCacheOptions>(options => { options.KeyPrefix = "EventHub:"; });
+        }
+
+        private void ConfigureTiming()
+        {
+            Configure<AbpClockOptions>(options => { options.Kind = DateTimeKind.Utc; });
         }
 
         private void ConfigureVirtualFileSystem(ServiceConfigurationContext context)
@@ -119,6 +130,17 @@ namespace EventHub.Admin
                     options.RequireHttpsMetadata = Convert.ToBoolean(configuration["AuthServer:RequireHttpsMetadata"]);
                     options.Audience = "EventHubAdmin";
                 });
+            MapClaims();
+        }
+
+        private void MapClaims()
+        {
+            AbpClaimTypes.UserName = ClaimTypes.Name;
+            AbpClaimTypes.Name = ClaimTypes.GivenName;
+            AbpClaimTypes.SurName = ClaimTypes.Surname;
+            AbpClaimTypes.UserId = ClaimTypes.NameIdentifier;
+            AbpClaimTypes.Role = ClaimTypes.Role;
+            AbpClaimTypes.Email = ClaimTypes.Email;
         }
 
         private static void ConfigureSwaggerServices(ServiceConfigurationContext context, IConfiguration configuration)
@@ -141,7 +163,7 @@ namespace EventHub.Admin
         {
             Configure<AbpLocalizationOptions>(options =>
             {
-                options.Languages.Add(new LanguageInfo("en", "en", "English", "gb"));
+                options.Languages.Add(new LanguageInfo("en", "en", "English"));
             });
         }
 
@@ -178,7 +200,7 @@ namespace EventHub.Admin
         {
             context.Services.AddSameSiteCookiePolicy();
         }
-        
+
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
         {
             var app = context.GetApplicationBuilder();
@@ -193,7 +215,7 @@ namespace EventHub.Admin
             {
                 new CultureInfo("en")
             };
-            
+
             app.UseAbpRequestLocalization(options =>
             {
                 options.DefaultRequestCulture = new RequestCulture("en");
@@ -213,7 +235,7 @@ namespace EventHub.Admin
 
             app.UseCookiePolicy();
             app.UseCorrelationId();
-            app.UseStaticFiles();
+            app.MapAbpStaticAssets();
             app.UseRouting();
             app.UseCors(DefaultCorsPolicyName);
             app.UseAuthentication();
